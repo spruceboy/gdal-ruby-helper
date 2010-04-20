@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
+require "rubygems"
 require "pp"
-require "ruby_gdal_helper"
+require "gdal_helper"
 
 #basic plan - open a 256 by 256 image, write some data, set the projection and geo_trans, then quit, job done.
 image_size = 256

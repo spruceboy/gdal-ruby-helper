@@ -305,8 +305,8 @@ class Gdal_File < Gdal_Stuff
           @gdal_file = Gdal::Gdal.open(name,Gdal::Gdalconst::GA_UPDATE )
         else
           driver = Gdal::Gdal.get_driver_by_name(driver)
-          puts(driver.class)
-          puts("Creating create(#{name}, #{xsize}, #{ysize}, #{bands}, #{data_type_to_gdal(data_type).to_s})")
+          #puts(driver.class)
+          #puts("Creating create(#{name}, #{xsize}, #{ysize}, #{bands}, #{data_type_to_gdal(data_type).to_s})")
           @gdal_file = driver.create(name, xsize, ysize, bands, data_type_to_gdal(data_type), options)
         end
       else

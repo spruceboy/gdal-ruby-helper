@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # Basic example - opens the files in argv and prints some info on them..
-require "pp"
-require "ruby_gdal_helper"
+require "rubygems"
+require "gdal_helper"
 
 ARGV.each do |item|
   gdal_file = Gdal_File.new(item)  #open the file..

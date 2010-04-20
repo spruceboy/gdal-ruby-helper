@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
-require "pp"
-require "ruby_gdal_helper"
+require "rubygems"
+require "gdal_helper"
 
 ## Open input file
 infile = Gdal_File.new(ARGV[0])
