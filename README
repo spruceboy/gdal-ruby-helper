@@ -1,2 +1,4 @@
 So, this is a rough (very) stab at a helper lib for the ruby bindings for gdal, http://gdal.org.
-Hopefully it will be useful..  have fun!  jay@spruceboy.net
+Hopefully it will be useful..  have fun! - jay@spruceboy.net
+
+It requires the standard ruby bindings for GDAL ( http://gdal.org) and OGR 
