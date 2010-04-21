@@ -302,16 +302,16 @@ end
 class GdalFile < GdalStuff
   def initialize ( name, mode="r", xsize=nil, ysize=nil,bands=3, driver="GTiff", data_type=String, options=['TILED=YES','COMPRESS=DEFLATE'] )
     if ( mode == "r" )
-      @Gdalfile = Gdal::Gdal.open(name)
+      @gdalfile = Gdal::Gdal.open(name)
     else
       if ( mode == "w")
         if (File.exists?(name))
-          @Gdalfile = Gdal::Gdal.open(name,Gdal::Gdalconst::GA_UPDATE )
+          @gdalfile = Gdal::Gdal.open(name,Gdal::Gdalconst::GA_UPDATE )
         else
           driver = Gdal::Gdal.get_driver_by_name(driver)
           #puts(driver.class)
           #puts("Creating create(#{name}, #{xsize}, #{ysize}, #{bands}, #{data_type_to_gdal(data_type).to_s})")
-          @Gdalfile = driver.create(name, xsize, ysize, bands, data_type_to_gdal(data_type), options)
+          @gdalfile = driver.create(name, xsize, ysize, bands, data_type_to_gdal(data_type), options)
         end
       else
         raise ArgumentError, "mode of \"#{mode}\" is not useful (not r|w) not sure what to do here folks", caller
@@ -320,7 +320,7 @@ class GdalFile < GdalStuff
     
     @bands=[]
     #1 is not a mistake - the raster bands start at 1 no 0. just a fyi.
-    1.upto(@Gdalfile.RasterCount).each {|x| @bands << GdalBand.new(@Gdalfile.get_raster_band(x))}
+    1.upto(@gdalfile.RasterCount).each {|x| @bands << GdalBand.new(@gdalfile.get_raster_band(x))}
   end
   
   ###
@@ -351,20 +351,20 @@ class GdalFile < GdalStuff
   
   #returns basic size info as a hash
   def size()
-    { "x"=> @Gdalfile.RasterXSize,
-      "y" => @Gdalfile.RasterYSize,
+    { "x"=> @gdalfile.RasterXSize,
+      "y" => @gdalfile.RasterYSize,
       "bands" => @bands.length,
       "data_type" => @bands[0].data_type()}
   end
   
   #x dimention size
   def xsize()
-    @Gdalfile.RasterXSize
+    @gdalfile.RasterXSize
   end
   
   #y dim size
   def ysize()
-    @Gdalfile.RasterYSize
+    @gdalfile.RasterYSize
   end
   
   #number of bands
@@ -384,29 +384,29 @@ class GdalFile < GdalStuff
   
   # gets the projection
   def get_projection
-    @Gdalfile.get_projection
+    @gdalfile.get_projection
   end
   
   #sets the projection
   def set_projection(proj_str)
-    @Gdalfile.set_projection(proj_str)
+    @gdalfile.set_projection(proj_str)
   end
   
   #looks up the projection in the epsg database, give it a number like 102006.
   def set_projection_epsg(epsg)
     srs =  Gdal::Osr::SpatialReference.new()
     srs.import_from_epsg(epsg)
-    @Gdalfile.set_projection(srs.export_to_wkt)
+    @gdalfile.set_projection(srs.export_to_wkt)
   end
   
   #sets the geo_transform, the wld file generally.
   def set_geo_transform(srs) 
-    @Gdalfile.set_geo_transform(srs)
+    @gdalfile.set_geo_transform(srs)
   end
   
   #gets the geo transform (wld file traditionally)
   def get_geo_transform()
-     @Gdalfile.get_geo_transform
+     @gdalfile.get_geo_transform
   end
   
 end
