@@ -409,4 +409,14 @@ class GdalFile < GdalStuff
      @gdalfile.get_geo_transform
   end
   
+  #iterator over each line..
+  def each_line( )
+    0.upto(ysize-1){|y| yield(read_bands(0,y,xsize,1))}
+  end
+  
+  #iterator over each line, with index
+  def each_line_with_index( )
+    0.upto(ysize-1){|y| yield(y,read_bands(0,y,xsize,1))}
+  end
+  
 end
