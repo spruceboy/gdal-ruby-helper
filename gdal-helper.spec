@@ -1,6 +1,6 @@
 require 'rubygems'
 
-if File.read('lib/version.rb') =~ /Version\s+=\s+"(\d+\.\d+\.\d+)"/
+if File.read('lib/version.rb') =~ /Version\s+=\s+"(\d+\.\d+\.\d+.\d+)"/
   version = $1
 else
   raise "no version"
