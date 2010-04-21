@@ -1,12 +1,12 @@
 #!/usr/bin/env ruby
 require "rubygems"
 require "pp"
-require "gdal_helper"
+require "Gdalhelper"
 
 #basic plan - open a 256 by 256 image, write some data, set the projection and geo_trans, then quit, job done.
 image_size = 256
 # Open a tiff to write to, with default create options (TILED=YES, COMPRESS=LZW) to write to..
-outfile = Gdal_File.new(ARGV[0], "w", image_size ,image_size,3,"GTiff", String, ["COMPRESS=DEFLATE", "TILED=YES"])
+outfile = GdalFile.new(ARGV[0], "w", image_size ,image_size,3,"GTiff", String, ["COMPRESS=DEFLATE", "TILED=YES"])
 0.upto(image_size-1) do |y|
   #Read a single line, line y
   bands = outfile.read_bands(0,y,image_size,1)

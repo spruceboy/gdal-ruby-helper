@@ -13,7 +13,7 @@ require 'gdal/osr'
 # Helper class for gdal.
 
 # class with constants and bits that will be used by all gdal-helper classes
-class Gdal_Stuff
+class GdalStuff
   # Does type mappings from gdal to ruby - pretty basic, and needs to be expanded so other types can be done, like for example
   # 32 bit integer types, 16 bit types, double floating bit types, unsigned int types, etc..
   def data_type_from_gdal(data_type)
@@ -30,6 +30,7 @@ class Gdal_Stuff
       when Gdal::Gdalconst::GDT_CINT32; return Float
       when Gdal::Gdalconst::GDT_CFLOAT32; return Float
       when Gdal::Gdalconst::GDT_CFLOAT64; return Float
+      else raise ArgumentError("Unknown data type.. not sure what to do here folks", caller)
     end
   end
   
@@ -53,7 +54,7 @@ end
 
 ##
 # Class wrapping up a gdal band. 
-class Gdal_Band < Gdal_Stuff
+class GdalBand < GdalStuff
   
   def initialize( band)
     @band = band
@@ -87,7 +88,8 @@ class Gdal_Band < Gdal_Stuff
       when Gdal::Gdalconst::GDT_CINT16; 'GDT_CINT16'   
       when Gdal::Gdalconst::GDT_CINT32; 'GDT_CINT32'  
       when Gdal::Gdalconst::GDT_CFLOAT32; 'GDT_CFLOAT32' 
-      when Gdal::Gdalconst::GDT_CFLOAT64; 'GDT_CFLOAT64' 
+      when Gdal::Gdalconst::GDT_CFLOAT64; 'GDT_CFLOAT64'
+      else raise ArgumentError("Unknown data type.. not sure what to do here folks", caller)
     end
     type_string
   end
@@ -222,6 +224,7 @@ class Gdal_Band < Gdal_Stuff
       when Gdal::Gdalconst::GDT_CINT32; ''    #What are these?
       when Gdal::Gdalconst::GDT_CFLOAT32; ''  #What are these?
       when Gdal::Gdalconst::GDT_CFLOAT64; '' #What are these?
+      else raise ArgumentError("Unknown data type.. not sure what to do here folks", caller)
     end
     return data.unpack(pack_template*data.length)
   end
@@ -282,6 +285,7 @@ class Gdal_Band < Gdal_Stuff
       when Gdal::Gdalconst::GDT_CINT32; ''    #What are these?
       when Gdal::Gdalconst::GDT_CFLOAT32; ''  #What are these?
       when Gdal::Gdalconst::GDT_CFLOAT64; '' #What are these?
+      else raise ArgumentError, "Unknown datatype.. not sure what to do here folks", caller
     end
     raise(ArgumentError, "Complex type requested, but no complex type handling.. not sure what to do here folks", caller) if ( pack_template == '')
     return data.pack(pack_template*data.length)
@@ -292,22 +296,22 @@ end
 ##
 # Class for a file - this is what most folks want
 # Use like:
-#infile = Gdal_File.new("foo.tif")
+#infile = GdalFile.new("foo.tif")
 #bands =  infile.read_bands(0,0,infile.xsize/4,infile.ysize/4)
 #..do something..
-class Gdal_File < Gdal_Stuff
+class GdalFile < GdalStuff
   def initialize ( name, mode="r", xsize=nil, ysize=nil,bands=3, driver="GTiff", data_type=String, options=['TILED=YES','COMPRESS=DEFLATE'] )
     if ( mode == "r" )
-      @gdal_file = Gdal::Gdal.open(name)
+      @Gdalfile = Gdal::Gdal.open(name)
     else
       if ( mode == "w")
         if (File.exists?(name))
-          @gdal_file = Gdal::Gdal.open(name,Gdal::Gdalconst::GA_UPDATE )
+          @Gdalfile = Gdal::Gdal.open(name,Gdal::Gdalconst::GA_UPDATE )
         else
           driver = Gdal::Gdal.get_driver_by_name(driver)
           #puts(driver.class)
           #puts("Creating create(#{name}, #{xsize}, #{ysize}, #{bands}, #{data_type_to_gdal(data_type).to_s})")
-          @gdal_file = driver.create(name, xsize, ysize, bands, data_type_to_gdal(data_type), options)
+          @Gdalfile = driver.create(name, xsize, ysize, bands, data_type_to_gdal(data_type), options)
         end
       else
         raise ArgumentError, "mode of \"#{mode}\" is not useful (not r|w) not sure what to do here folks", caller
@@ -316,7 +320,7 @@ class Gdal_File < Gdal_Stuff
     
     @bands=[]
     #1 is not a mistake - the raster bands start at 1 no 0. just a fyi.
-    1.upto(@gdal_file.RasterCount).each {|x| @bands << Gdal_Band.new(@gdal_file.get_raster_band(x))}
+    1.upto(@Gdalfile.RasterCount).each {|x| @bands << GdalBand.new(@Gdalfile.get_raster_band(x))}
   end
   
   ###
@@ -347,20 +351,20 @@ class Gdal_File < Gdal_Stuff
   
   #returns basic size info as a hash
   def size()
-    { "x"=> @gdal_file.RasterXSize,
-      "y" => @gdal_file.RasterYSize,
+    { "x"=> @Gdalfile.RasterXSize,
+      "y" => @Gdalfile.RasterYSize,
       "bands" => @bands.length,
       "data_type" => @bands[0].data_type()}
   end
   
   #x dimention size
   def xsize()
-    @gdal_file.RasterXSize
+    @Gdalfile.RasterXSize
   end
   
   #y dim size
   def ysize()
-    @gdal_file.RasterYSize
+    @Gdalfile.RasterYSize
   end
   
   #number of bands
@@ -380,29 +384,29 @@ class Gdal_File < Gdal_Stuff
   
   # gets the projection
   def get_projection
-    @gdal_file.get_projection
+    @Gdalfile.get_projection
   end
   
   #sets the projection
   def set_projection(proj_str)
-    @gdal_file.set_projection(proj_str)
+    @Gdalfile.set_projection(proj_str)
   end
   
   #looks up the projection in the epsg database, give it a number like 102006.
   def set_projection_epsg(epsg)
     srs =  Gdal::Osr::SpatialReference.new()
     srs.import_from_epsg(epsg)
-    @gdal_file.set_projection(srs.export_to_wkt)
+    @Gdalfile.set_projection(srs.export_to_wkt)
   end
   
   #sets the geo_transform, the wld file generally.
   def set_geo_transform(srs) 
-    @gdal_file.set_geo_transform(srs)
+    @Gdalfile.set_geo_transform(srs)
   end
   
   #gets the geo transform (wld file traditionally)
   def get_geo_transform()
-     @gdal_file.get_geo_transform
+     @Gdalfile.get_geo_transform
   end
   
 end

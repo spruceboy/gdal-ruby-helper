@@ -4,7 +4,7 @@ require "rubygems"
 require "gdal_helper"
 
 ARGV.each do |item|
-  gdal_file = Gdal_File.new(item)  #open the file..
+  gdal_file = GdalFile.new(item)  #open the file..
   size = gdal_file.size()  #get the size hash..
   puts("#{item}: #{size["x"]}x#{size["y"]}")
   puts("#{item}: #{size["bands"]} bands of type #{size["data_type"]}")
