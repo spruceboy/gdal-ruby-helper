@@ -4,9 +4,18 @@
 # blame for this work goes to jay@spruceboy.net
 # Feel free to fork/revamp/whatever - credit would be nice, but not required.
 # I am hoping some more qualified folks will take this on and make it gleam with super goodness - Have at it folks!
-require "gdal/gdal"
-require "gdal/gdalconst"
-require 'gdal/osr'
+
+##
+# I am confused about how gdal shows up on varous distros - here are two tries..
+begin
+  require "gdal/gdal"
+  require "gdal/gdalconst"
+  require 'gdal/osr'
+rescue LoadError=>e
+  require "gdal"
+  require "gdalconst"
+  require 'osr'
+end
 
 
 ###
