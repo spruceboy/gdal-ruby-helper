@@ -1,4 +1,4 @@
 module GdalHelper
-  Version = "0.0.1.3"
+  Version = "0.0.1.4"
 end
 

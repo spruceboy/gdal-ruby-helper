@@ -1,9 +1,31 @@
 #!/usr/bin/env ruby
+# Author::    Jay Cable <jay@spruceboy.net>
+# Copyright:: Copyright (c) 2010 Jay Cable
+# License::   Distributes under the same terms as Ruby.
+##
+# = \Gdal Helper - A simple wrapper class for gdal
 # A simple wrapper class for gdal - the goal is to provide a very simple and easy interface to gdal in ruby.  
 # Ruby's gdal bindings, and ruby's ogr bindings are required.
 # blame for this work goes to jay@spruceboy.net
-# Feel free to fork/revamp/whatever - credit would be nice, but not required.
-# I am hoping some more qualified folks will take this on and make it gleam with super goodness - Have at it folks!
+# == Roadmap
+# * Feel free to fork/revamp/whatever - credit would be nice, but not required.
+# * I am hoping some more qualified folks will take this on and make it gleam with super goodness - Have at it folks!
+# == Summary
+# Once installed, you can read a file like this:
+#   require "gdal_helper"
+#   infile = GdalFile.new(filename)
+#   infile.each_line do |data|
+#      ..do something with data..
+#   end
+#
+# And write some gdal file like this:
+#   require "gdal_helper"
+#   outfile = GdalFile.new(file_name, "w", 30,30,3,"GTiff", String, ["COMPRESS=DEFLATE", "TILED=YES"])
+#   #write some data..
+#   outfile.write_bands(0,1,30,1,data)
+#
+# For more examples see the "examples" directory.
+# Have fun!
 
 ##
 # I am confused about how gdal shows up on varous distros - here are two tries..
@@ -109,7 +131,8 @@ class GdalBand < GdalStuff
   end
   
   private
-  
+   #--
+   # This is just for reference - don't rdoc this stuff..
    # string.pack notes - for refrence for the function below.
    #  Format | Returns | Function
    #-------+---------+-----------------------------------------
@@ -218,6 +241,7 @@ class GdalBand < GdalStuff
    #  @    | ---     | skip to the offset given by the
    #       |         | length argument
    #-------+---------+-----------------------------------------
+   #++
   #unpacks the data
   def unpack ( items, data)
     pack_template = case (@band.DataType)
@@ -238,6 +262,9 @@ class GdalBand < GdalStuff
     return data.unpack(pack_template*data.length)
   end
   
+  
+ #--
+ # dont rdoc this stuff.. just notes from pack for my own quick reference..
  #Notes for pack..
  # #Directives for pack.
  #
@@ -279,6 +306,7 @@ class GdalBand < GdalStuff
  #    X     |  Back up a byte
  #    x     |  Null byte
  #    Z     |  Same as ``a'', except that null is added with *
+ #++
  # packs data in prep to write to gdal..
   def pack(data)
     pack_template = case(@band.DataType)
@@ -414,6 +442,7 @@ class GdalFile < GdalStuff
   end
   
   #gets the geo transform (wld file traditionally)
+  # Returns an array with this information: [Origin (top left corner), X pixel size, Rotation (0 if north is up),Y Origin (top left corner), Rotation (0 if north is up), Y pixel size *-1 (its negitive)]
   def get_geo_transform()
      @gdalfile.get_geo_transform
   end
@@ -426,6 +455,19 @@ class GdalFile < GdalStuff
   #iterator over each line, with index
   def each_line_with_index( )
     0.upto(ysize-1){|y| yield(y,read_bands(0,y,xsize,1))}
+  end
+  
+  # returns the extents as a {"xmin" => min, "ymin" => ymin, "xmax" => xmax, "ymax" => ymax} sort of construct..
+  def get_extents
+    transform = @gdalfile.get_geo_transform
+    #[274785.0, 30.0, 0.0, 4906905.0, 0.0, -30.0]
+    #[(0)Origin (top left corner), (1) X pixel size, (2) Rotation (0 if north is up),(3)Y Origin (top left corner), (4) Rotation (0 if north is up), (5) Y pixel size]
+    {
+      "xmin" => transform[0].to_f,
+      "ymin"=> transform[3].to_f + ysize().to_f * transform[5].to_f,
+      "ymax" => transform[3].to_f,
+      "xmax" => transform[0].to_f + xsize().to_f * transform[1].to_f
+    }
   end
   
 end
